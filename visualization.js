@@ -4,13 +4,16 @@ d3.selectAll("svg > *").remove();
 
 div.innerHTML = '';
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-svg.style.height = `${(Math.ceil(State.atoms().length / 2 + 1)) * 250}px`;
+svg.style.height = `${(Math.ceil(State.atoms().length + 1)) * 280}px`;
 div.style.maxHeight = '100vh';
 div.style.overflow = 'auto';
 div.appendChild(svg);
 
 
-function printCard(card, xOffset, yOffset) {
+function printCard(stateAtom, card, xOffset, yOffset) {
+  const cMoved = stateAtom.cardsMoved.toString().split('\n');
+  const cardName = card._atoms[0]._id;
+
   d3.select(svg)
     .append("rect")
     .attr("x", xOffset)
@@ -19,10 +22,10 @@ function printCard(card, xOffset, yOffset) {
     .attr("height", 50)
     .attr("stroke-width", 1)
     .attr("stroke", "black")
-    .attr("fill", "white")
+    .attr("fill", cMoved.includes(cardName) ? 'gray' : "white")
     .text(card.value);
   // Number
-  var c = Card.atom(card._atoms[0]._id);
+  var c = Card.atom(cardName);
   d3.select(svg)
     .append("text")
     .attr("x", xOffset + 8)
@@ -58,7 +61,7 @@ const sortHand = (h) =>
 function printPile(stateAtom, player, xOffset, yOffset) {
   var curr_xOffset = xOffset + 10;
   sortHand(player.hand[stateAtom]._tuples).forEach((card) => {
-    printCard(card, curr_xOffset, yOffset);
+    printCard(stateAtom, card, curr_xOffset, yOffset);
     curr_xOffset = curr_xOffset + 30;
   });
 }
@@ -104,7 +107,7 @@ function printState(stateAtom, xOffset, yOffset) {
     .append("rect")
     .attr("x", xOffset)
     .attr("y", yOffset)
-    .attr("width", 400)
+    .attr("width", 600)
     .attr("height", 260)
     .attr("fill", tableColor)
     .attr("stroke-width", 2)
@@ -139,7 +142,7 @@ function printState(stateAtom, xOffset, yOffset) {
 
   if (!emptyPile) {
     sortHand(Pile.atom("Pile0").hand[stateAtom]._tuples).forEach((card) => {
-      printCard(card, curr_xOffset, yOffset + 190);
+      printCard(stateAtom, card, curr_xOffset, yOffset + 190);
       curr_xOffset = curr_xOffset + 30;
     });
   }
@@ -153,51 +156,41 @@ function printState(stateAtom, xOffset, yOffset) {
     .text("Current Value: " + stateAtom.currValue.toString());
 
   // Cards Moved
-  d3.select(svg)
-    .append("text")
-    .attr("x", xOffset + 280)
-    .attr("y", yOffset + 190)
-    .attr("font-weight", "bolder")
-    .text("Cards Moved");
+  // d3.select(svg)
+  //   .append("text")
+  //   .attr("x", xOffset + 280)
+  //   .attr("y", yOffset + 190)
+  //   .attr("font-weight", "bolder")
+  //   .text("Cards Moved");
 
   // Print cards moved
   // Is this necessary? Adds clutter + can be confusing since cards moved also includes bs calls (i.e cards moved != cards played)
-  var curr_xoffset = xOffset + 280;
-  stateAtom.cardsMoved._tuples.forEach((card) => {
-    printCard(card, curr_xoffset, yOffset + 190);
-    curr_xoffset = curr_xoffset + 30;
-  });
+  // var curr_xoffset = xOffset + 280;
+  // stateAtom.cardsMoved._tuples.forEach((card) => {
+  //   printCard(stateAtom, card, curr_xoffset, yOffset + 190);
+  //   curr_xoffset = curr_xoffset + 30;
+  // });
 }
 
 const tableColor = "#458554";
 
-var responsiveDivHeight = 30 * 30;
+// var responsiveDivHeight = 30 * 30;
 var legendSVG = d3
   .select(svg)
-  .attr("height", "100%")
+//   .attr("height", "100%")
   .attr("width", "100%")
-  .attr("viewBox", "0 0 850 " + responsiveDivHeight + "")
-  .attr("preserveAspectRatio", "xMinYMin");
+//   .attr("viewBox", "0 0 850 " + responsiveDivHeight + "")
+//   .attr("preserveAspectRatio", "xMinYMin");
 
 // This is for the states, in this case b = 10 or 11 states
 var yOffset = 0;
-for (row = 0; row <= 4; row++) {
-  var xOffset = 0;
-  for (col = 0; col <= 1; col++) {
-    const stateNum = row * 2 + col;
-    const stateName = "State" + stateNum;
-    if (stateNum > 9) {
-      break;
-    }
+var xOffset = 0;
+for (let stateNum = 0; stateNum < State.atoms().length; stateNum++) {
+  const stateName = "State" + stateNum;
 
-    if (State.atom(stateName) != null)
-      var stateAtom = State.atom("State" + stateNum);
+  var stateAtom = State.atom(stateName);
 
-    printState(stateAtom, xOffset, yOffset);
+  printState(stateAtom, xOffset, yOffset);
 
-    xOffset += 420;
-    if (col == 1) {
-      yOffset = yOffset + 280;
-    }
-  }
+  yOffset = yOffset + 280;
 }
