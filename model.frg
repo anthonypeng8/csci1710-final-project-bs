@@ -228,88 +228,88 @@ pred completeTraces {
     some s: State | some p: Player | winningTurn[s, p]
 }
 
-test expect {
-    vacuity: {
-        wellFormed
-        traces
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+// test expect {
+//     vacuity: {
+//         wellFormed
+//         traces
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is sat
 
-    cardsHaveOneOwner: {
-        (wellFormed and traces) => (all s: State | {
-            all c: Card | one ch: CardHolder | c in ch.hand[s]
-        })
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     cardsHaveOneOwner: {
+//         (wellFormed and traces) => (all s: State | {
+//             all c: Card | one ch: CardHolder | c in ch.hand[s]
+//         })
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    cardsMustMove: {
-        (wellFormed and traces) => {
-            all s: State | (some s.nextState) => (some s.cardsMoved)
-        }
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     cardsMustMove: {
+//         (wellFormed and traces) => {
+//             all s: State | (some s.nextState) => (some s.cardsMoved)
+//         }
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    manyCardsCanMove: {
-        wellFormed
-        traces
-        some s: State | {
-            (some s.nextState)
-            #{s.cardsMoved} > 1
-        }
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     manyCardsCanMove: {
+//         wellFormed
+//         traces
+//         some s: State | {
+//             (some s.nextState)
+//             #{s.cardsMoved} > 1
+//         }
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is sat
 
-    cardMovesToOrFromPile: {
-        (wellFormed and traces) => (all s: State | {
-            (some s.nextState) => (
-                (s.cardsMoved in Pile.hand[s]) iff not (s.cardsMoved in Pile.hand[s.nextState])
-            )
-        })
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     cardMovesToOrFromPile: {
+//         (wellFormed and traces) => (all s: State | {
+//             (some s.nextState) => (
+//                 (s.cardsMoved in Pile.hand[s]) iff not (s.cardsMoved in Pile.hand[s.nextState])
+//             )
+//         })
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    -- Can't play cards and call BS in the same turn
-    playAndBSAreExclusive: {
-        (wellFormed and traces) => {
-            all s: State | (some s.nextState) => {
-                playCards[s] iff not (some p: Player | callBS[s, p])
-            }
-        }
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     -- Can't play cards and call BS in the same turn
+//     playAndBSAreExclusive: {
+//         (wellFormed and traces) => {
+//             all s: State | (some s.nextState) => {
+//                 playCards[s] iff not (some p: Player | callBS[s, p])
+//             }
+//         }
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    -- Calling BS after another player called should be impossible
-    cantCallBSTwice: {
-        wellFormed
-        traces
-        some s: State | {
-            (some s.nextState)
-            some p1: Player | callBS[s, p1]
-            some p2: Player | callBS[s.nextState, p2]
-        }
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is unsat
+//     -- Calling BS after another player called should be impossible
+//     cantCallBSTwice: {
+//         wellFormed
+//         traces
+//         some s: State | {
+//             (some s.nextState)
+//             some p1: Player | callBS[s, p1]
+//             some p2: Player | callBS[s.nextState, p2]
+//         }
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is unsat
 
-    -- With many players, multiple players could call BS in one turn because,
-    -- if the last player BS'd, it doesn't matter who calls it.
-    -- In our 2-player model, the current player's turn has to be the one to
-    -- call bs
-    // canCallBSTwiceInOneTurn: {
-    //     wellFormed
-    //     traces
-    //     some s: State | {
-    //         (some s.nextState)
-    //         some disj p1, p2: Player | callBS[s, p1] and callBS[s, p2]
-    //     }
-    // } for 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-    cantCallBSTwiceInOneTurn: {
-        wellFormed
-        traces
-        some s: State | {
-            (some s.nextState)
-            some disj p1, p2: Player | callBS[s, p1] and callBS[s, p2]
-        }
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is unsat
+//     -- With many players, multiple players could call BS in one turn because,
+//     -- if the last player BS'd, it doesn't matter who calls it.
+//     -- In our 2-player model, the current player's turn has to be the one to
+//     -- call bs
+//     // canCallBSTwiceInOneTurn: {
+//     //     wellFormed
+//     //     traces
+//     //     some s: State | {
+//     //         (some s.nextState)
+//     //         some disj p1, p2: Player | callBS[s, p1] and callBS[s, p2]
+//     //     }
+//     // } for 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     cantCallBSTwiceInOneTurn: {
+//         wellFormed
+//         traces
+//         some s: State | {
+//             (some s.nextState)
+//             some disj p1, p2: Player | callBS[s, p1] and callBS[s, p2]
+//         }
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is unsat
 
-    completeTraceHasVictor: {
-        (wellFormed and completeTraces) => {
-            all s: State | (no s.nextState) => (some p: Player | no p.hand[s])
-        }
-    } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-}
+//     completeTraceHasVictor: {
+//         (wellFormed and completeTraces) => {
+//             all s: State | (no s.nextState) => (some p: Player | no p.hand[s])
+//         }
+//     } for 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+// }
 
 
 // Strategies
@@ -324,9 +324,6 @@ test expect {
     // # of BS'd turns
 
 // :Between two players, it's always possible to determine if someone is BS'ing.
-
-
-// bla bla bla ignore what's below here
 
 // Some strategies -- we set an initial state and test certain strategies
 
@@ -414,14 +411,17 @@ pred playerKnowsOtherIsLyingORT[s: State, p: player] {
 -- Call BS when certain that a player has lied (unless another player does it)
 pred callsEasyBSORT[p: Player] {
     all s: State | {
-        playerKnowsOtherIsLyingORT[s, p] => {
+        (playerKnowsOtherIsLyingORT[s, p] and some s.nextState.nextState) => {
             some p: Player | callBS[s.nextState, p]
         }
     }
 }
 pred onlyCallsEasyBSORT[p: Player] {
     all s: State | {
-        callBS[s.nextState, p] => playerKnowsOtherIsLyingORT[s.nextState, p]
+        callBS[s.nextState, p] => (
+            playerKnowsOtherIsLyingORT[s, p]
+            or (some otherPlayer: Player | otherPlayer != p and callBS[s.nextState, otherPlayer])
+        )
     }
 }
 
@@ -432,83 +432,95 @@ pred allCallEasyBSORT {
     }
 }
 
-test expect {
-    // Between two players, the optimal strategy is to not lie.
-
-    ortVacuity: {
-        wellFormed
-        oneRunTrace
-        allCallEasyBSORT
-        fastShedding
-    } for exactly 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-
-    fastSheddingEquivalence: {
-        fastShedding iff (all p: Player | playsAllTrueCards[p])
-    } for exactly 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-
-
-    pickupCausesSetback: {
-        (wellFormed and oneRunTrace) => {
-            all s: State, p: Player | pickUp[s, p] => {
-                some iState, eState: State | {
-                    runInit[iState]
-                    runEnd[eState]
-                    p.hand[iState] in p.hand[eState]
-                }
-            }
-        }
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-
-    // Test for playerKnowsOtherIsLyingORT
-    // If some player detects a BS, then it has to be certain.
-    testLieDetection: {
-        (wellFormed and oneRunTrace) => {
-            all s: State | {
-                (some p: Player | playerKnowsOtherIsLyingORT[s, p]) => playBS[s]
-            }
-        }
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-
-    -- It is possible to play false cards and not be called on it, even with two
-    -- players. (You just don't get any advantage from it.)
-    twoPlayersCanPlayBS: {
-        (wellFormed and oneRunTrace and allCallEasyBSORT)
-        some s: State | {
-            playBS[s]
-            no p: Player | playerKnowsOtherIsLyingORT[s, p]
-        }
-    } for exactly 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-
-    -- If you play all true cards held and some extras, the other player will
-    -- detect the lie.
-    twoPlayersUnoptimalBS: {
-        (wellFormed and oneRunTrace and allCallEasyBSORT and fastShedding) =>
-        (all s: State | {
-            playBS[s] iff {
-                some p: Player | playerKnowsOtherIsLyingORT[s, p]
-            }
-        })
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-    
-    -- Stronger-ish version of the statement above
-    -- At each turn, there's a limit to how many cards can be played.
-    -- If you're supposed to play 3's and you held 2 at the start of the run,
-    -- you can only play 2 cards at most when asked to play 3's.
-    twoPlayersCantShedQuicker: {
-        (wellFormed and oneRunTrace and allCallEasyBSORT) =>
-        (all s: State | {
-            playCards[s] and #(s.cardsMoved) > numCardsOfValueKnownORT[s.whoseTurn, s.currValue] => {
-                some p: Player | playerKnowsOtherIsLyingORT[s, p]
-            }
-        })
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-
-    oneBSPerRun: {
-        (wellFormed and oneRunTrace and allCallEasyBSORT and fastShedding) => {
-            lone s: State | playBS[s]
-        }
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+pred playsOptimallyORT[p: Player] {
+    tryToPlayTruthfully[p] and playsAllTrueCards[p]
+    callsEasyBSORT[p] and onlyCallsEasyBSORT[p]
 }
+
+// test expect {
+//     // Between two players, the optimal strategy is to not lie.
+
+//     ortVacuity: {
+//         wellFormed
+//         oneRunTrace
+//         allCallEasyBSORT
+//         fastShedding
+//     } for exactly 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+
+//     fastSheddingEquivalence: {
+//         fastShedding iff (all p: Player | playsAllTrueCards[p])
+//     } for exactly 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+
+
+//     pickupCausesSetback: {
+//         (wellFormed and oneRunTrace) => {
+//             all s: State, p: Player | pickUp[s, p] => {
+//                 some iState, eState: State | {
+//                     runInit[iState]
+//                     runEnd[eState]
+//                     p.hand[iState] in p.hand[eState]
+//                 }
+//             }
+//         }
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+
+//     // Test for playerKnowsOtherIsLyingORT
+//     // If some player detects a BS, then it has to be certain.
+//     testLieDetection: {
+//         (wellFormed and oneRunTrace) => {
+//             all s: State | {
+//                 (some p: Player | playerKnowsOtherIsLyingORT[s, p]) => playBS[s]
+//             }
+//         }
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+
+//     -- It is possible to play false cards and not be called on it, even with two
+//     -- players. (You just don't get any advantage from it.)
+//     twoPlayersCanPlayBS: {
+//         (wellFormed and oneRunTrace and allCallEasyBSORT)
+//         some s: State | {
+//             playBS[s]
+//             no p: Player | playerKnowsOtherIsLyingORT[s, p]
+//         }
+//     } for exactly 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+
+//     -- If you play all true cards held and some extras, the other player will
+//     -- detect the lie.
+//     twoPlayersUnoptimalBS: {
+//         (wellFormed and oneRunTrace and allCallEasyBSORT and fastShedding) =>
+//         (all s: State | {
+//             playBS[s] iff {
+//                 some p: Player | playerKnowsOtherIsLyingORT[s, p]
+//             }
+//         })
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+    
+//     -- Stronger-ish version of the statement above
+//     -- At each turn, there's a limit to how many cards can be played.
+//     -- If you're supposed to play 3's and you held 2 at the start of the run,
+//     -- you can only play 2 cards at most when asked to play 3's.
+//     twoPlayersCantShedQuicker: {
+//         (wellFormed and oneRunTrace and allCallEasyBSORT) =>
+//         (all s: State | {
+//             playCards[s] and #(s.cardsMoved) > numCardsOfValueKnownORT[s.whoseTurn, s.currValue] => {
+//                 some p: Player | playerKnowsOtherIsLyingORT[s, p]
+//             }
+//         })
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+
+//     oneBSPerRun: {
+//         (wellFormed and oneRunTrace and allCallEasyBSORT and fastShedding) => {
+//             lone s: State | playBS[s]
+//         }
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+
+//     p1CanCallBSORT: {
+//         wellFormed
+//         oneRunTrace
+//         playsOptimallyORT[P1]
+//         some s: State | callBS[s, P1] and pickUp[s, P2]
+//     } for 10 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+// }
 
 
 
@@ -532,7 +544,7 @@ pred canPlayTruthfully[s: State, p: Player] {
 // Try not to BS
 pred tryToPlayTruthfully[p: Player] {
     all s: State | {
-        canPlayTruthfully[s, p] => dontPlayBS[s]
+        (canPlayTruthfully[s, p] and playCards[s]) => dontPlayBS[s]
     }
 }
 
@@ -559,38 +571,38 @@ pred startsMostRecentRun[s: State, curState: State] {
         (s2 = curState or occursBefore[s2, curState])
 }
 
-test expect {
-    startsMostRecentRunORTCounting: {
-        (wellFormed and oneRunTrace) => (
-            (some s: State, p: Player | winningTurn[s, p]) => (
-                #{runStart: State | some s: State | startsMostRecentRun[runStart, s]} <= 2
-            ) else (
-                -- Only the first and last states of a one-run trace start a run
-                #{runStart: State | some s: State | startsMostRecentRun[runStart, s]}
-                    = min[#State + 2]
-            )
-        )
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+// test expect {
+//     startsMostRecentRunORTCounting: {
+//         (wellFormed and oneRunTrace) => (
+//             (some s: State, p: Player | winningTurn[s, p]) => (
+//                 #{runStart: State | some s: State | startsMostRecentRun[runStart, s]} <= 2
+//             ) else (
+//                 -- Only the first and last states of a one-run trace start a run
+//                 #{runStart: State | some s: State | startsMostRecentRun[runStart, s]}
+//                     = min[#State + 2]
+//             )
+//         )
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    startsMostRecentRunORT: {
-        (wellFormed and oneRunTrace) => {
-            all runStart: State | (some s: State | startsMostRecentRun[runStart, s])
-                => (runInit[runStart] or runEnd[runStart])
-        }
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     startsMostRecentRunORT: {
+//         (wellFormed and oneRunTrace) => {
+//             all runStart: State | (some s: State | startsMostRecentRun[runStart, s])
+//                 => (runInit[runStart] or runEnd[runStart])
+//         }
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    allStatesInOneRun: {
-        (wellFormed and traces) => {
-            all s: State | one runStart: State | startsMostRecentRun[runStart, s]
-        }
-    } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     allStatesInOneRun: {
+//         (wellFormed and traces) => {
+//             all s: State | one runStart: State | startsMostRecentRun[runStart, s]
+//         }
+//     } for 5 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
     
-    multiRunVacuity: {
-        wellFormed
-        traces
-        #{runStart: State | some s: State | startsMostRecentRun[runStart, s]} > 2
-    } for 6 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-}
+//     multiRunVacuity: {
+//         wellFormed
+//         traces
+//         #{runStart: State | some s: State | startsMostRecentRun[runStart, s]} > 2
+//     } for 6 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+// }
 
 fun cardsKnown[curState: State, p: Player]: set Card {
     p.hand[{s: State | startsMostRecentRun[s, curState]}]
@@ -617,7 +629,7 @@ pred playerKnowsOtherIsLying[s: State, p: player] {
 -- Call BS when certain that a player has lied (unless another player does it)
 pred callsEasyBS[p: Player] {
     all s: State | {
-        playerKnowsOtherIsLying[s, p] => {
+        (playerKnowsOtherIsLying[s, p] and some s.nextState.nextState) => {
             some p: Player | callBS[s.nextState, p]
         }
     }
@@ -627,7 +639,7 @@ pred onlyCallsEasyBS[p: Player] {
         callBS[s.nextState, p] => {
             playerKnowsOtherIsLying[s, p]
             -- If the last play was a lie, we can't tell who calls BS here
-            or (some otherPlayer: Player | callBS[s.nextState, otherPlayer])
+            or (some otherPlayer: Player | otherPlayer != p and callBS[s.nextState, otherPlayer])
         }
     }
 }
@@ -637,64 +649,59 @@ pred playsOptimally[p: Player] {
     callsEasyBS[p] and onlyCallsEasyBS[p]
 }
 
+// test expect {
+//     gameVacuity: {
+//         wellFormed
+//         traces
+//         fairStart
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     completeGameVacuity: {
+//         wellFormed
+//         completeTraces
+//         fairStart
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     completeGameStrategyVacuity: {
+//         wellFormed
+//         completeTraces
+//         fairStart
+//         playsOptimally[P1]
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     completeGameStrategyVacuityBothPlayers: {
+//         wellFormed
+//         completeTraces
+//         fairStart
+//         playsOptimally[P1]
+//         playsOptimally[P2]
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
 
-test expect {
-    gameVacuity: {
-        wellFormed
-        traces
-        fairStart
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-    gameStrategyVacuity: {
-        wellFormed
-        traces
-        fairStart
-        playsOptimally[P1]
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-    completeGameVacuity: {
-        wellFormed
-        completeTraces
-        fairStart
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-    completeGameStrategyVacuity: {
-        wellFormed
-        completeTraces
-        fairStart
-        playsOptimally[P1]
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     canBSOptimal: {
+//         wellFormed
+//         completeTraces
+//         fairStart
+//         playsOptimally[P1]
+//         some s: State | (not winningTurn[s, P1]) and callBS[s, P1] 
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
 
-    canBSOptimal: {
-        wellFormed
-        completeTraces
-        fairStart
-        playsOptimally[P1]
-        some s: State | (not winningTurn[s, P1]) and callBS[s, P1] 
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
+//     p1WinsWhenP1OptimalComplete: {
+//         (wellFormed and completeTraces and fairStart and playsOptimally[P1]) => {
+//             some s: State | winningTurn[s, P1]
+//         }
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
 
-    p1WinsWhenP1Optimal: {
-        (wellFormed and traces and fairStart and playsOptimally[P1]) => {
-            some s: State, p: Player | winningTurn[s, p] =>
-            (some s: State | winningTurn[s, P1])
-        }
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
-    p1WinsWhenP1OptimalComplete: {
-        (wellFormed and completeTraces and fairStart and playsOptimally[P1]) => {
-            some s: State | winningTurn[s, P1]
-        }
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     p2WinsWhenStartIsUnfair: {
+//         (wellFormed and completeTraces and playsOptimally[P1]) => {
+//             some s: State | winningTurn[s, P2]
+//         }
+//     } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
 
-    p1WinsWhenP1P2Optimal: {
-        (wellFormed and completeTraces and fairStart and playsOptimally[P1] and playsOptimally[P2]) => {
-            some s: State | winningTurn[s, P1]
-        }
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is theorem
+//     p1CanCallBS: {
+//         wellFormed
+//         completeTraces
+//         playsOptimally[P1]
+//         some s: State | callBS[s, P1] and pickUp[s, P2]
+//     } for 10 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
 
-    p2LosesWhenStartIsUnfair: {
-        (wellFormed and completeTraces and playsOptimally[P1]) => {
-            some s: State | winningTurn[s, P2]
-        }
-    } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers is sat
-
-}
+// }
 
 -- Run a standard trace of the game for 10 states.
 // run {
@@ -708,10 +715,35 @@ test expect {
 //     completeTraces
 // } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers
 
--- Run a game where player 1 plays optimally.
+
+// -- Run a game
+// run {
+//     wellFormed
+//     completeTraces
+//     fairStart
+// } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers
+
+// -- Run a game where player 1 plays optimally.
+// run {
+//     wellFormed
+//     completeTraces
+//     playsOptimally[P1]
+//     some s: State | callBS[s, P1] and pickUp[s, P2]
+// } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers
+
+// -- Run a game where player 1 plays optimally and wins.
+// run {
+//     wellFormed
+//     completeTraces
+//     fairStart
+//     playsOptimally[P1]
+//     some s: State | callBS[s, P1] and pickUp[s, P2]
+// } for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers
+
+-- Run a one-run-trace
 run {
     wellFormed
-    completeTraces
-    fairStart
-    playsOptimally[P1]
-} for 20 State, 5 Int for FiveRanksFourSuitsTwoPlayers
+    oneRunTrace
+    playsOptimallyORT[P1]
+    some s: State | callBS[s, P1] and pickUp[s, P2]
+} for 10 State, 5 Int for FiveRanksFourSuitsTwoPlayers
